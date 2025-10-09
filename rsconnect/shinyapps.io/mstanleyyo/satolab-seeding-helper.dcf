@@ -5,7 +5,7 @@ account: mstanleyyo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 15691789
-bundleId: 11006025
+bundleId: 11010625
 url: https://mstanleyyo.shinyapps.io/satolab-seeding-helper/
 version: 1
 asMultiple: FALSE
