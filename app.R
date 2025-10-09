@@ -4,10 +4,12 @@ library(tibble)
 library(shiny)
 library(bslib)
 
+github_link <- "https://github.com/mstanley-yo/satolab-seeding-helper"
+
 ui <- page_fluid(
     theme = bs_theme(bootswatch = "flatly"),  # modern mobile-friendly theme
     br(),
-    titlePanel("Lenti-X Seeding Calculator"),
+    titlePanel("Cell Seeding Calculator"),
     br(),
     
     # Layout optimized for mobile
@@ -27,8 +29,11 @@ ui <- page_fluid(
             radioButtons(
                 "plate_input",
                 "Plate/Dish type",
-                list("6-well dish (12 mL)" = 12,
-                     "15 cm dish (20 mL)" = 20),
+                list(
+                    "96-well plate (10 mL)" = 10,
+                    "6-well dish (12 mL)" = 12,
+                    "15 cm dish (20 mL)" = 20
+                ),
                 selected = 20
             ),
             numericInput(
@@ -51,7 +56,16 @@ ui <- page_fluid(
             # Show dilution table
             h4("Dilution table:"),
             textOutput("target_volume_text"),
-            tableOutput("result")
+            tableOutput("result"),
+            p("Written in R Shiny by Maximilian Stanley Yo."),
+            p(
+                "Follow development here: ",
+                tags$a(
+                    "GitHub Repository", 
+                    href = github_link, 
+                    target = "_blank"
+                )
+            )
         )
     )
 )
