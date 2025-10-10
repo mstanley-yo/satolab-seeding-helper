@@ -47,10 +47,10 @@ ui <- page_fluid(
             sliderInput(
                 "c2",
                 "Target concentration (×10^5 cells/mL)",
-                min = 0,
+                min = 1,
                 max = 2.5,
                 value = 2.5,
-                step = 0.5
+                step = 0.25
             ),
             
             # Show dilution table
@@ -100,10 +100,10 @@ server <- function(input, output, session) {
         v2 <- as.numeric(input$plate_input) * as.numeric(input$num_input)
         
         # Calculate stock volume to dilute using C1V1 = C2V2
-        v1 <- c2 * v2 / c1
+        v1 <- round(c2 * v2 / c1)
         
-        # Create nearby V1 values from V1−2 to V1+4 (ensure >0)
-        v1_range <- round(seq(v1 - 2, v1 + 4, by = 1))
+        # Create nearby V1 values from V1−5 to V1+5 (ensure >0)
+        v1_range <- seq(v1 - 5, v1 + 5, by = 1)
         v1_range <- v1_range[v1_range > 0]
         v1_range <- as.integer(v1_range)
         
