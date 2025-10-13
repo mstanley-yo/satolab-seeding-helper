@@ -48,14 +48,15 @@ ui <- page_fluid(
                 "c2",
                 "Target concentration (×10^5 cells/mL)",
                 min = 1,
-                max = 2.5,
+                max = 3,
                 value = 2.5,
                 step = 0.25
             ),
+            textOutput("cell_count"),
             
             # Show dilution table
             h4("Dilution table:"),
-            textOutput("target_volume_text"),
+            textOutput("target_volume"),
             tableOutput("result"),
             p("Written in R Shiny by Maximilian Stanley Yo."),
             p(
@@ -71,17 +72,47 @@ ui <- page_fluid(
 )
 
 server <- function(input, output, session) {
+    
+    # Validate inputs function
+    validate_inputs <- function(warn = TRUE) {
+        if (warn == TRUE) {
+            # Prompt user for inputs if none
+            validate(
+                need(input$c1 != "", 
+                     "Please input stock concentration!"),
+                need(input$plate_input != "", 
+                     "Please select plate/dish type!"),
+                need(input$num_input > 0, 
+                     "Please input number of plates to seed!")
+            )
+        } else {
+            # only render if it can, but don't need to notify the user
+            req(input$plate_input, input$num_input)
+        }
+    }
+    
+    # Text output for total cell count
+    output$cell_count <- renderText({
+        # validate inputs
+        validate_inputs(warn = F)
+        
+        if (input$plate_input == 20) {
+            paste(
+                "Cell count per 15 cm dish:", 
+                format(
+                    input$c2 * as.numeric(input$plate_input) * 100000, 
+                    big.mark = ",",
+                    scientific = FALSE
+                ), 
+                "cells"
+            )
+        }
+    })
+    
     # Text output for target volume
-    output$target_volume_text <- renderText({
-        # Prompt user for inputs if none
-        validate(
-            need(input$c1 != "", 
-                 "Please input stock concentration!"),
-            need(input$plate_input != "", 
-                 "Please select plate/dish type!"),
-            need(input$num_input > 0, 
-                 "Please input number of plates to seed!")
-        )
+    output$target_volume <- renderText({
+        # validate inputs
+        validate_inputs(warn = T)
         
         v2 <- as.numeric(input$plate_input) * as.numeric(input$num_input)
         paste("Target volume:", v2, "mL")
@@ -89,8 +120,8 @@ server <- function(input, output, session) {
     
     # Table output for dilutions
     output$result <- renderTable({
-        # only render if it can, but don't need to notify the user
-        req(input$plate_input, input$num_input)
+        # validate inputs
+        validate_inputs(warn = F)
         
         # Assign concentrations (×10^5 cells/mL)
         c1 <- as.numeric(input$c1)
