@@ -6,6 +6,14 @@ library(bslib)
 
 github_link <- "https://github.com/mstanley-yo/satolab-seeding-helper"
 
+format_num <- function(num) {
+    format(
+        num, 
+        big.mark = ",",
+        scientific = FALSE
+    )
+}
+
 ui <- page_fluid(
     theme = bs_theme(bootswatch = "flatly"),  # modern mobile-friendly theme
     br(),
@@ -96,14 +104,22 @@ server <- function(input, output, session) {
         # validate inputs
         validate_inputs(warn = F)
         
-        if (input$plate_input == 20) {
+        if (input$plate_input == 10) {
+            paste(
+                "Cell count per 100 µL well:",
+                format_num(input$c2 * 0.1 * 100000),
+                "cells"
+            )
+        } else if (input$plate_input == 12) {
+            paste(
+                "Cell count per 2 mL well:",
+                format_num(input$c2 * 2 * 100000),
+                "cells"
+            )
+        } else if (input$plate_input == 20) {
             paste(
                 "Cell count per 15 cm dish:", 
-                format(
-                    input$c2 * as.numeric(input$plate_input) * 100000, 
-                    big.mark = ",",
-                    scientific = FALSE
-                ), 
+                format_num(input$c2 * 20 * 100000),
                 "cells"
             )
         }
@@ -114,7 +130,7 @@ server <- function(input, output, session) {
         # validate inputs
         validate_inputs(warn = T)
         
-        v2 <- as.numeric(input$plate_input) * as.numeric(input$num_input)
+        v2 <- as.numeric(input$plate_input) * input$num_input
         paste("Target volume:", v2, "mL")
     })
     
@@ -128,7 +144,7 @@ server <- function(input, output, session) {
         c2 <- as.numeric(input$c2)
         
         # Calculate total target volume (mL)
-        v2 <- as.numeric(input$plate_input) * as.numeric(input$num_input)
+        v2 <- as.numeric(input$plate_input) * input$num_input
         
         # Calculate stock volume to dilute using C1V1 = C2V2
         v1 <- round(c2 * v2 / c1)
