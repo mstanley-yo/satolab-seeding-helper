@@ -16,9 +16,14 @@ format_num <- function(num) {
 
 ui <- page_fluid(
     theme = bs_theme(bootswatch = "flatly"),  # modern mobile-friendly theme
-    br(),
-    titlePanel("Cell Seeding Calculator"),
-    br(),
+    tags$head(
+        tags$title("Cell Seeding Calculator")  
+    ),
+    tags$h3(
+        "Cell Seeding Calculator", 
+        class = "text-primary", 
+        style = "margin-top: 15px;margin-bottom: 15px;"
+    ),
     
     # Layout optimized for mobile
     layout_column_wrap(
@@ -155,17 +160,20 @@ server <- function(input, output, session) {
         v1_range <- as.integer(v1_range)
         
         # Calculate corresponding V2 values for each V1
-        v2_calc <- floor(c1 * v1_range / c2)
-        v2_calc <- as.integer(v2_calc)
+        v2_calc <- as.integer(floor(c1 * v1_range / c2))
         
         # Calculate DMEM to add to get V2 from V1
         dmem_to_add <- v2_calc - v1_range
         
+        # Calculate number of plates
+        plate_num <- as.integer(floor(v2_calc / as.numeric(input$plate_input)))
+        
         # Return a data frame for the table
         tibble(
-            `Stock vol. (mL)` = v1_range,
-            `Add DMEM to stock: (mL)` = dmem_to_add,
-            `Target vol. (mL)` = v2_calc
+            `Stock (mL)` = v1_range,
+            `DMEM add (mL)` = dmem_to_add,
+            `Target (mL)` = v2_calc,
+            `Plates` = plate_num
         )
     })
 }
