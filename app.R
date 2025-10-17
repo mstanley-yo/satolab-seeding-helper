@@ -91,16 +91,26 @@ server <- function(input, output, session) {
         if (warn == TRUE) {
             # Prompt user for inputs if none
             validate(
-                need(input$c1 != "", 
-                     "Please input stock concentration!"),
-                need(input$plate_input != "", 
-                     "Please select plate/dish type!"),
-                need(input$num_input > 0, 
-                     "Please input number of plates to seed!")
+                need(
+                    input$c1 != "", 
+                    "Please input stock concentration!"
+                ),
+                need(
+                    input$plate_input != "", 
+                    "Please select plate/dish type!"
+                ),
+                need(
+                    input$num_input > 0, 
+                    "Please input number of plates to seed!"
+                ),
+                need(
+                    input$c1 && input$c2 && input$c1 >= input$c2,
+                    "Stock concentration is too low for dilution target!"
+                )
             )
         } else {
             # only render if it can, but don't need to notify the user
-            req(input$plate_input, input$num_input)
+            req(input$plate_input, input$num_input, input$c1 >= input$c2)
         }
     }
     
