@@ -4,18 +4,17 @@ library(tibble)
 library(shiny)
 library(bslib)
 
-github_link <- "https://github.com/mstanley-yo/satolab-seeding-helper"
-
-format_num <- function(num) {
-    format(
-        num, 
-        big.mark = ",",
-        scientific = FALSE
-    )
-}
+# clickable github icon + link
+github_link <- tags$a(
+    shiny::icon("github"), "GitHub",
+    href = "https://github.com/mstanley-yo/satolab-seeding-helper",
+    target = "_blank"
+)
 
 ui <- page_fluid(
-    theme = bs_theme(bootswatch = "flatly"),  # modern mobile-friendly theme
+    theme = bs_theme(bootswatch = "flatly"),
+    
+    # title
     tags$head(
         tags$title("Cell Seeding Calculator")  
     ),
@@ -25,62 +24,53 @@ ui <- page_fluid(
         style = "margin-top: 15px;margin-bottom: 15px;"
     ),
     
-    # Layout optimized for mobile
-    layout_column_wrap(
-        width = 1,
-        card(
-            # Input stock concentration
-            card_header("Enter stock concentration and target volume"),
-            numericInput(
-                "c1", 
-                "Stock concentration (×10^5 cells/mL)",
-                value = "",
-                min = 0
+    # body
+    card(
+        # Input stock concentration
+        card_header("Input stock concentration and target volume"),
+        numericInput(
+            "c1", 
+            "Stock concentration (×10^5 cells/mL)",
+            value = "",
+            min = 0
+        ),
+        
+        # Input plate type & number to determine target volume
+        radioButtons(
+            "plate_input",
+            "Plate/Dish type",
+            list(
+                "96-well plate (10 mL)" = 10,
+                "6-well dish (12 mL)" = 12,
+                "15 cm dish (20 mL)" = 20
             ),
-
-            # Determine target volume
-            radioButtons(
-                "plate_input",
-                "Plate/Dish type",
-                list(
-                    "96-well plate (10 mL)" = 10,
-                    "6-well dish (12 mL)" = 12,
-                    "15 cm dish (20 mL)" = 20
-                ),
-                selected = 20
-            ),
-            numericInput(
-                "num_input", 
-                "Number of plates/dishes to seed",
-                value = "",
-                min = 0
-            ),
-            
-            # Input target concentration
-            sliderInput(
-                "c2",
-                "Target concentration (×10^5 cells/mL)",
-                min = 1,
-                max = 3,
-                value = 2.5,
-                step = 0.25
-            ),
-            textOutput("cell_count"),
-            
-            # Show dilution table
-            h4("Dilution table:"),
-            textOutput("target_volume"),
-            tableOutput("result"),
-            p("Written in R Shiny by Maximilian Stanley Yo."),
-            p(
-                "Follow development here: ",
-                tags$a(
-                    "GitHub Repository", 
-                    href = github_link, 
-                    target = "_blank"
-                )
-            )
-        )
+            selected = 20
+        ),
+        numericInput(
+            "num_input", 
+            "Number of plates/dishes to seed",
+            value = "",
+            min = 0
+        ),
+        
+        # Input target concentration
+        sliderInput(
+            "c2",
+            "Target concentration (×10^5 cells/mL)",
+            min = 1,
+            max = 3,
+            value = 2.5,
+            step = 0.25
+        ),
+        textOutput("cell_count")),
+    
+    # Show dilution table
+    card(
+        card_header("Dilution table"),
+        textOutput("target_volume"),
+        tableOutput("result"),
+        p("Written in R Shiny by Maximilian Stanley Yo."),
+        github_link
     )
 )
 
@@ -96,22 +86,34 @@ server <- function(input, output, session) {
                     "Please input stock concentration!"
                 ),
                 need(
-                    input$plate_input != "", 
-                    "Please select plate/dish type!"
-                ),
-                need(
                     input$num_input > 0, 
                     "Please input number of plates to seed!"
-                ),
-                need(
-                    input$c1 && input$c2 && input$c1 >= input$c2,
-                    "Stock concentration is too low for dilution target!"
                 )
             )
+            
+            # Only run this after c1 is filled
+            if (input$c1 != "") {
+                validate(
+                    need(
+                        input$c1 >= input$c2,
+                        "Stock concentration is too low for dilution target!"
+                    )
+                )
+            }
+            
         } else {
             # only render if it can, but don't need to notify the user
             req(input$plate_input, input$num_input, input$c1 >= input$c2)
         }
+    }
+    
+    # Make numbers readable
+    format_num <- function(num) {
+        format(
+            num, 
+            big.mark = ",",
+            scientific = FALSE
+        )
     }
     
     # Text output for total cell count
