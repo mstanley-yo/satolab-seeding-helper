@@ -25,52 +25,54 @@ ui <- page_fluid(
     ),
     
     # body
-    card(
-        # Input stock concentration
-        card_header("Input stock concentration and target volume"),
-        numericInput(
-            "c1", 
-            "Stock concentration (×10^5 cells/mL)",
-            value = "",
-            min = 0
-        ),
-        
-        # Input plate type & number to determine target volume
-        radioButtons(
-            "plate_input",
-            "Plate/Dish type",
-            list(
-                "96-well plate (10 mL)" = 10,
-                "6-well dish (12 mL)" = 12,
-                "15 cm dish (20 mL)" = 20
+    layout_columns(
+        card(
+            # Input stock concentration
+            card_header("Input stock concentration and target volume"),
+            numericInput(
+                "c1", 
+                "Stock concentration (×10^5 cells/mL)",
+                value = "",
+                min = 0
             ),
-            selected = 20
-        ),
-        numericInput(
-            "num_input", 
-            "Number of plates/dishes to seed",
-            value = "",
-            min = 0
-        ),
+            
+            # Input plate type & number to determine target volume
+            radioButtons(
+                "plate_input",
+                "Plate/Dish type",
+                list(
+                    "96-well plate (10 mL)" = 10,
+                    "6-well dish (12 mL)" = 12,
+                    "15 cm dish (20 mL)" = 20
+                ),
+                selected = 20
+            ),
+            numericInput(
+                "num_input", 
+                "Number of plates/dishes to seed",
+                value = "",
+                min = 0
+            ),
+            
+            # Input target concentration
+            sliderInput(
+                "c2",
+                "Target concentration (×10^5 cells/mL)",
+                min = 1,
+                max = 3,
+                value = 2.5,
+                step = 0.25
+            ),
+            textOutput("cell_count")),
         
-        # Input target concentration
-        sliderInput(
-            "c2",
-            "Target concentration (×10^5 cells/mL)",
-            min = 1,
-            max = 3,
-            value = 2.5,
-            step = 0.25
-        ),
-        textOutput("cell_count")),
-    
-    # Show dilution table
-    card(
-        card_header("Dilution table"),
-        textOutput("target_volume"),
-        tableOutput("result"),
-        p("Written in R Shiny by Maximilian Stanley Yo."),
-        github_link
+        # Show dilution table
+        card(
+            card_header("Dilution table"),
+            textOutput("target_volume"),
+            tableOutput("result"),
+            p("Written in R Shiny by Maximilian Stanley Yo."),
+            github_link
+        )
     )
 )
 
@@ -167,7 +169,7 @@ server <- function(input, output, session) {
         v1 <- round(c2 * v2 / c1)
         
         # Create nearby V1 values from V1−5 to V1+5 (ensure >0)
-        v1_range <- seq(v1 - 5, v1 + 5, by = 1)
+        v1_range <- seq(v1 - 5, v1 + 6, by = 1)
         v1_range <- v1_range[v1_range > 0]
         v1_range <- as.integer(v1_range)
         
@@ -183,7 +185,7 @@ server <- function(input, output, session) {
         # Return a data frame for the table
         tibble(
             `Stock (mL)` = v1_range,
-            `DMEM add (mL)` = dmem_to_add,
+            `DMEM (mL)` = dmem_to_add,
             `Target (mL)` = v2_calc,
             `Plates` = plate_num
         )
