@@ -58,7 +58,7 @@ ui <- page_fluid(
             sliderInput(
                 "c2",
                 "Target concentration (×10^5 cells/mL)",
-                min = 1,
+                min = 0.25,
                 max = 3,
                 value = 2.5,
                 step = 0.25
@@ -120,8 +120,8 @@ server <- function(input, output, session) {
     
     # Text output for total cell count
     output$cell_count <- renderText({
-        # validate inputs
-        validate_inputs(warn = F)
+        # validate only c1
+        req(input$c1)
         
         if (input$plate_input == 10) {
             paste(
