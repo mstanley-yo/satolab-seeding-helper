@@ -124,9 +124,6 @@ server <- function(input, output, session) {
     
     # Text output for total cell count
     output$cell_count <- renderText({
-        # validate only c1
-        req(input$c1)
-        
         if (input$plate_input == 10) {
             paste(
                 "Cell count per 100 µL well:",
