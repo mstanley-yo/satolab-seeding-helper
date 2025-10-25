@@ -33,7 +33,8 @@ ui <- page_fluid(
                 "c1", 
                 "Stock concentration (×10^5 cells/mL)",
                 value = "",
-                min = 0
+                min = 0,
+                width = "100%"
             ),
             
             # Input plate type & number to determine target volume
@@ -45,13 +46,15 @@ ui <- page_fluid(
                     "6-well dish (12 mL)" = 12,
                     "15 cm dish (20 mL)" = 20
                 ),
-                selected = 20
+                selected = 20,
+                width = "100%"
             ),
             numericInput(
                 "num_input", 
                 "Number of plates/dishes to seed",
                 value = "",
-                min = 0
+                min = 0,
+                width = "100%"
             ),
             
             # Input target concentration
@@ -60,8 +63,9 @@ ui <- page_fluid(
                 "Target concentration (×10^5 cells/mL)",
                 min = 0.25,
                 max = 3,
-                value = 2.5,
-                step = 0.25
+                value = 1,
+                step = 0.25,
+                width = "100%"
             ),
             textOutput("cell_count")),
         
