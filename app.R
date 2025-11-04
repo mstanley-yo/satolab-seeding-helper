@@ -31,7 +31,7 @@ ui <- page_fluid(
             card_header("Input stock concentration and target volume"),
             numericInput(
                 "c1", 
-                "Stock concentration (×10^5 cells/mL)",
+                "Stock concentration (×10⁵ cells/mL)",
                 value = "",
                 min = 0,
                 width = "100%"
@@ -60,7 +60,7 @@ ui <- page_fluid(
             # Input target concentration
             sliderInput(
                 "c2",
-                "Target concentration (×10^5 cells/mL)",
+                "Target concentration (×10⁵ cells/mL)",
                 min = 0.25,
                 max = 3,
                 value = 1,
@@ -159,7 +159,7 @@ server <- function(input, output, session) {
         # validate inputs
         validate_inputs(warn = F)
         
-        # Assign concentrations (×10^5 cells/mL)
+        # Assign concentrations (×10⁵ cells/mL)
         c1 <- as.numeric(input$c1)
         c2 <- as.numeric(input$c2)
         
