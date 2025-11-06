@@ -77,14 +77,14 @@ ui <- page_fluid(
                     value = 1,
                     step = 0.25,
                     width = "100%"
-                )
+                ),
+                textOutput("cell_count")
             )
         ),
         
         # Show dilution table
         card(
             card_header("Dilution table"),
-            textOutput("cell_count"),
             textOutput("target_volume"),
             tableOutput("result"),
             p("Written in R Shiny by Maximilian Stanley Yo."),
