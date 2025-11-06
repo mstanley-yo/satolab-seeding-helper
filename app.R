@@ -26,52 +26,65 @@ ui <- page_fluid(
     
     # body
     layout_columns(
-        card(
+        layout_columns(
+            col_widths = c(12,12),
             # Input stock concentration
-            card_header("Input stock concentration and target volume"),
-            numericInput(
-                "c1", 
-                "Stock concentration (×10⁵ cells/mL)",
-                value = "",
-                min = 0,
-                width = "100%"
-            ),
-            
-            # Input plate type & number to determine target volume
-            radioButtons(
-                "plate_input",
-                "Plate/Dish type",
-                list(
-                    "96-well plate (10 mL)" = 10,
-                    "6-well dish (12 mL)" = 12,
-                    "15 cm dish (20 mL)" = 20
+            card(
+                card_header("Stock concentration"),
+                numericInput(
+                    "c1", 
+                    "Stock concentration (×10⁵ or ×10⁶ cells/mL)",
+                    value = "",
+                    min = 0,
+                    width = "100%"
                 ),
-                selected = 20,
-                width = "100%"
-            ),
-            numericInput(
-                "num_input", 
-                "Number of plates/dishes to seed",
-                value = "",
-                min = 0,
-                width = "100%"
+                radioButtons(
+                    "c1_units",
+                    "Units",
+                    list("×10⁵ cells/mL" = 1, "×10⁶ cells/mL" = 10),
+                    selected = 10,
+                    width = "100%",
+                    inline = T
+                )
             ),
             
-            # Input target concentration
-            sliderInput(
-                "c2",
-                "Target concentration (×10⁵ cells/mL)",
-                min = 0.25,
-                max = 3,
-                value = 1,
-                step = 0.25,
-                width = "100%"
-            ),
-            textOutput("cell_count")),
+            # Input target volume and concentration
+            card(
+                card_header("Target concentration and volume"),
+                radioButtons(
+                    "plate_input",
+                    "Plate/Dish type",
+                    list(
+                        "96-well plate (10 mL)" = 10,
+                        "6-well dish (12 mL)" = 12,
+                        "15 cm dish (20 mL)" = 20
+                    ),
+                    selected = 20,
+                    width = "100%"
+                ),
+                numericInput(
+                    "num_input", 
+                    "Number of plates/dishes to seed",
+                    value = "",
+                    min = 0,
+                    width = "100%"
+                ),
+                sliderInput(
+                    "c2",
+                    "Target concentration (×10⁵ cells/mL)",
+                    min = 0.25,
+                    max = 3,
+                    value = 1,
+                    step = 0.25,
+                    width = "100%"
+                )
+            )
+        ),
         
         # Show dilution table
         card(
             card_header("Dilution table"),
+            textOutput("cell_count"),
             textOutput("target_volume"),
             tableOutput("result"),
             p("Written in R Shiny by Maximilian Stanley Yo."),
@@ -99,17 +112,19 @@ server <- function(input, output, session) {
             
             # Only run this after c1 is filled
             if (input$c1 != "") {
-                validate(
-                    need(
-                        input$c1 >= input$c2,
-                        "Stock concentration is too low for dilution target!"
-                    )
-                )
+                validate(need(
+                    input$c1 * as.numeric(input$c1_units) >= input$c2,
+                    "Stock concentration is too low for dilution target!"
+                ))
             }
             
         } else {
             # only render if it can, but don't need to notify the user
-            req(input$plate_input, input$num_input, input$c1 >= input$c2)
+            req(
+                input$plate_input, 
+                input$num_input, 
+                input$c1 * as.numeric(input$c1_units) >= input$c2
+            )
         }
     }
     
@@ -160,7 +175,7 @@ server <- function(input, output, session) {
         validate_inputs(warn = F)
         
         # Assign concentrations (×10⁵ cells/mL)
-        c1 <- as.numeric(input$c1)
+        c1 <- as.numeric(input$c1) * as.numeric(input$c1_units)
         c2 <- as.numeric(input$c2)
         
         # Calculate total target volume (mL)
