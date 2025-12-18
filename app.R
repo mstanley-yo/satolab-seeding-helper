@@ -52,7 +52,7 @@ ui <- page_fluid(
       card(
         card_header("Target concentration and volume"),
         radioButtons(
-          "plate_input",
+          "seeding_plate",
           "Plate/Dish type",
           list(
             "96-well plate (10 mL)" = 10,
@@ -95,7 +95,7 @@ ui <- page_fluid(
 
 server <- function(input, output, session) {
   # Validate inputs function
-  validate_inputs <- function(warn = TRUE) {
+  validate_seeding <- function(warn = TRUE) {
     if (warn == TRUE) {
       # Prompt user for inputs if none
       validate(
@@ -119,7 +119,7 @@ server <- function(input, output, session) {
     } else {
       # only render if it can, but don't need to notify the user
       req(
-        input$plate_input,
+        input$seeding_plate,
         input$num_input,
         input$c1 * as.numeric(input$c1_units) >= input$c2
       )
@@ -137,19 +137,19 @@ server <- function(input, output, session) {
 
   # Text output for total cell count
   output$cell_count <- renderText({
-    if (input$plate_input == 10) {
+    if (input$seeding_plate == 10) {
       paste(
         "Cell count per 100 µL well:",
         format_num(input$c2 * 0.1 * 100000),
         "cells"
       )
-    } else if (input$plate_input == 12) {
+    } else if (input$seeding_plate == 12) {
       paste(
         "Cell count per 2 mL well:",
         format_num(input$c2 * 2 * 100000),
         "cells"
       )
-    } else if (input$plate_input == 20) {
+    } else if (input$seeding_plate == 20) {
       paste(
         "Cell count per 15 cm dish:",
         format_num(input$c2 * 20 * 100000),
@@ -161,23 +161,23 @@ server <- function(input, output, session) {
   # Text output for target volume
   output$target_volume <- renderText({
     # validate inputs
-    validate_inputs(warn = TRUE)
+    validate_seeding(warn = TRUE)
 
-    v2 <- as.numeric(input$plate_input) * input$num_input
+    v2 <- as.numeric(input$seeding_plate) * input$num_input
     paste("Target volume:", v2, "mL")
   })
 
   # Table output for dilutions
   output$result <- renderTable({
     # validate inputs
-    validate_inputs(warn = FALSE)
+    validate_seeding(warn = FALSE)
 
     # Assign concentrations (×10⁵ cells/mL)
     c1 <- as.numeric(input$c1) * as.numeric(input$c1_units)
     c2 <- as.numeric(input$c2)
 
     # Calculate total target volume (mL)
-    v2 <- as.numeric(input$plate_input) * input$num_input
+    v2 <- as.numeric(input$seeding_plate) * input$num_input
 
     # Calculate stock volume to dilute using C1V1 = C2V2
     v1 <- round(c2 * v2 / c1)
@@ -194,7 +194,7 @@ server <- function(input, output, session) {
     dmem_to_add <- v2_calc - v1_range
 
     # Calculate number of plates
-    plate_num <- as.integer(floor(v2_calc / as.numeric(input$plate_input)))
+    plate_num <- as.integer(floor(v2_calc / as.numeric(input$seeding_plate)))
 
     # Return a data frame for the table
     tibble(
